@@ -245,11 +245,12 @@ func (s *pdfSorter) Swap(i, j int) {
 /* Merge PDF files and output. */
 func (m merger) doMerge(pdfs []pdfFile) error {
 	info, err := os.Stat(m.out)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
+	// out points either to an existing / non-existent file or a dir
 	outFilename := m.out
-	if info.IsDir() {
+	if info != nil && info.IsDir() {
 		randBase := randFilename()
 		outFilename = filepath.Join(outFilename, randBase)
 	}
