@@ -1,7 +1,5 @@
 # mpdf
 
-**The project is still work in progress**.
-
 Merge PDF files in a given directory.
 
 ## Usage
@@ -36,6 +34,6 @@ mpdf -r -in /path/to/pdf/dir -out /path/to/merged/pdf
 
 By default `mpdf` fails if there already existed a file with specified destination filename. To overwrite, use `-f` flag.
 
-## Dependencies
+## Third-party Dependencies
 
 * `pdfcpu` for merging PDF files
