@@ -6,11 +6,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 
 	"github.com/h2non/filetype"
-	"github.com/jung-kurt/gofpdf"
+	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 )
 
 const (
@@ -39,7 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 	if !ok {
-		fmt.Println("Cannot write to output path %s", outAbs)
+		fmt.Printf("Cannot write to output path %s\n", outAbs)
 		os.Exit(1)
 	}
 	inAbs, err := filepath.Abs(*in)
@@ -54,9 +55,9 @@ func main() {
 		reversed:  *reversed,
 		overwrite: *overwrite,
 	}
-	err = m.merge()
+	err = m.Merge()
 	if err != nil {
-		fmt.Printf("Error when merging PDF files: %s", err)
+		fmt.Printf("Error when merging PDF files: %s\n", err)
 		os.Exit(1)
 	}
 }
@@ -108,7 +109,7 @@ type merger struct {
 	Call pdfcpu to merge files and output;
 	Clean up if necessary, and exit.
 */
-func (m merger) merge() error {
+func (m merger) Merge() error {
 	pdfs, err := collectPDF(m.in)
 	if err != nil {
 		return err
@@ -116,7 +117,7 @@ func (m merger) merge() error {
 		fmt.Printf("Found %d PDF files under path %s. Skip merging", len(pdfs), m.in)
 		return nil
 	}
-	// in-place sort
+	// sort by specified criteria
 	m.sort(pdfs)
 	// merge
 	return m.doMerge(pdfs)
@@ -140,6 +141,7 @@ func isPDF(fp string) (bool, error) {
 }
 
 /*
+	Collect PDF files in input directory.
 	Processes files which are the direct children of path p only. Assumes p is an absolute path.
 */
 func collectPDF(p string) ([]pdfFile, error) {
@@ -195,23 +197,83 @@ type pdfFile struct {
 	modTime time.Time
 }
 
+func (f pdfFile) Filename() string {
+	return filepath.Base(f.path)
+}
+
 func (m merger) sort(pdfs []pdfFile) {
-
-}
-
-func (m merger) doMerge(pdfs []pdfFile) error {
-	return nil
-}
-
-func genPDF(n int) {
-	for i := 1; i <= n; i++ {
-		pdf := gofpdf.New("P", "mm", "A4", "")
-		pdf.AddPage()
-		pdf.SetFont("Arial", "B", 16)
-		pdf.Cell(40, 10, fmt.Sprint(i))
-		err := pdf.OutputFileAndClose(fmt.Sprintf("./data/file-%d.pdf", i))
-		if err != nil {
-			panic(err)
+	// identify sort criteria
+	lessFunc := func(f1, f2 *pdfFile) bool {
+		return f1.Filename() < f2.Filename()
+	}
+	if m.chrono {
+		lessFunc = func(f1, f2 *pdfFile) bool {
+			return f1.modTime.Before(f2.modTime)
 		}
 	}
+	by(lessFunc).Sort(pdfs, m.reversed)
 }
+
+/* Sort helpers */
+type by func(f1, f2 *pdfFile) bool
+
+func (b by) Sort(pdfs []pdfFile, reversed bool) {
+	var sorter sort.Interface = &pdfSorter{pdfs, b}
+	if reversed {
+		sorter = sort.Reverse(sorter)
+	}
+	sort.Sort(sorter)
+}
+
+type pdfSorter struct {
+	pdfs []pdfFile
+	by   func(f1, f2 *pdfFile) bool
+}
+
+func (s *pdfSorter) Len() int {
+	return len(s.pdfs)
+}
+
+func (s *pdfSorter) Less(i, j int) bool {
+	return s.by(&s.pdfs[i], &s.pdfs[j])
+}
+
+func (s *pdfSorter) Swap(i, j int) {
+	s.pdfs[i], s.pdfs[j] = s.pdfs[j], s.pdfs[i]
+}
+
+/* Merge PDF files and output. */
+func (m merger) doMerge(pdfs []pdfFile) error {
+	info, err := os.Stat(m.out)
+	if err != nil {
+		return err
+	}
+	outFilename := m.out
+	if info.IsDir() {
+		randBase := randFilename()
+		outFilename = filepath.Join(outFilename, randBase)
+	}
+	var pdfPaths []string
+	for _, f := range pdfs {
+		pdfPaths = append(pdfPaths, f.path)
+	}
+	return pdfcpu.MergeFile(pdfPaths, outFilename, nil)
+}
+
+func randFilename() string {
+	now := time.Now().UnixNano()
+	return fmt.Sprintf("merged-%d.pdf", now)
+}
+
+// func genPDF(n int) {
+// 	for i := 1; i <= n; i++ {
+// 		pdf := gofpdf.New("P", "mm", "A4", "")
+// 		pdf.AddPage()
+// 		pdf.SetFont("Arial", "B", 16)
+// 		pdf.Cell(40, 10, fmt.Sprint(i))
+// 		err := pdf.OutputFileAndClose(fmt.Sprintf("./data/file-%d.pdf", i))
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 	}
+// }

@@ -13,9 +13,12 @@ Merge all PDF files and output the merged file in the current directory:
 ```shell
 mpdf
 ```
+
+By default, `mpdf` merges PDF files it found in ascending lexicographical order of filename.
+
 `mpdf` will pick a random filename for the merged file if it is not specified via `-out` flag. It guarantees the filename never clash with those of existing files in the destination directory.
 
-Merge all pdf files in directory `/path/to/pdf/dir`, in ascending lexicographical order of filename, then output the merged PDF file to specified destination:
+Merge all pdf files in directory `/path/to/pdf/dir`, then output the merged PDF file to specified destination:
 ```shell
 mpdf -in /path/to/pdf/dir -out /path/to/merged/pdf
 ```
