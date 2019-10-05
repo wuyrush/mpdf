@@ -265,16 +265,3 @@ func randFilename() string {
 	now := time.Now().UnixNano()
 	return fmt.Sprintf("merged-%d.pdf", now)
 }
-
-// func genPDF(n int) {
-// 	for i := 1; i <= n; i++ {
-// 		pdf := gofpdf.New("P", "mm", "A4", "")
-// 		pdf.AddPage()
-// 		pdf.SetFont("Arial", "B", 16)
-// 		pdf.Cell(40, 10, fmt.Sprint(i))
-// 		err := pdf.OutputFileAndClose(fmt.Sprintf("./data/file-%d.pdf", i))
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 	}
-// }

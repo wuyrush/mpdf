@@ -1,0 +1,18 @@
+language: go
+go:
+- 1.x
+env:
+  global:
+  - GO111MODULE=true
+git:
+  depth: 3
+deploy:
+  provider: releases
+  api_key:
+    secure: lVe3RDBKGE89hkyDODo3vS9nsp5+3oI9h/O4wmVxjm7GGAiEBSO8XIr+OngvcBBB0azLcQHhvDpwWh5tI56VEmw0xvBvfHB1eFBRzaZpwAhmsViwasNk9ger7KeCO960bEE9w1iozpKaB0QWZItTX9cHuU+Elk+p4DxD0BG0sPQ9oyzH67euKs4QiTvqnwq437IXsRw616jey3oUSZonzTaTWaQjP9sBeNON/MeG9YkyfYaBN01cXbOxzBrRETNzzL2i/2zyX1LWhDL3gNu0D1ryQ7fENEQ7vtFdS+0WTwHANuRl2XVI9fSs0e1fqMQZSfuAdDkTNuP7DDXL0a4ah5WHD5NMZ/J6S2AN4pV9Ml2OoK9CVRorLtwHN78m3TBCOaVVpqpg3k1d7ZoHYUC5Y5hRtZNQBP1qMpT/FF3lP/k74h3mMiEFTc4ZfCS/v8Zi+xlrUYwgvg5ItANM2hFME5PJ1jh1lVZPe8dkf71d9K47LWRI7pWzaPBSjeoav1C4qJ+Ha78S+6N6NYBfl6aJK/UFoxDyFUPJI7Zto9JZhKybqiEVIN4iO2DD/XtCbmW7rfWgbhlp4ZUJiJH7L4pqEqYRBCOFPVLWdZjankZBQWUPxqT+73Jp/KLF6l6xEDlX64UWZsYHDWGxhFCMapfpoUJs7cUA6rvK7uEhAxM8kLQ=
+  file_glob: true 
+  file: build/*
+  skip_cleanup: true
+  on:
+    repo: wuyrush/mpdf
+    tags: true
