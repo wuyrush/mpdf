@@ -39,3 +39,4 @@ By default `mpdf` fails if there already existed a file with specified destinati
 ## Third-party Dependencies
 
 * [`pdfcpu`](https://pdfcpu.io) for merging PDF files
+
