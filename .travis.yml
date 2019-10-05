@@ -3,7 +3,7 @@ go:
 - 1.x
 env:
   global:
-  - GO111MODULE=true
+  - GO111MODULE=on
 git:
   depth: 3
 deploy:
